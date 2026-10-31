@@ -1,29 +1,44 @@
+# Configuration
+$OPNsense = [PSCustomObject]@{
+    Name          = "opnsense"
+    Generation    = 2
+    CPUCount      = 2
+    VRAMBytes     = 4GB
+    Path          = "V:\Kiformatou\opnsense"
+    VHDPath       = "V:\Kiformatou\opnsense\opnsense.vhdx"
+    VHDSizeBytes  = 8GB
+    SwitchNameWAN = "INTERNET"
+    SwitchNameLAN = "KIFORMATOU"
+    ISOPath       = "V:\ISO\opnsense-26.7.iso"
+}
+
 # Create the VM directory
-New-Item -ItemType Directory -Path "V:\Kiformatou\opnsense" -Force | Out-Null
+New-Item -ItemType Directory -Path $OPNsense.Path -Force | Out-Null
 
 # Create a Generation 2 VM with 4 GB RAM and a 64 GB virtual disk
-New-VM -Name opnsense `
-    -Generation 2 `
-    -MemoryStartupBytes 4GB `
-    -Path "V:\Kiformatou\opnsense" `
-    -NewVHDPath "V:\Kiformatou\opnsense\opnsense.vhdx" `
-    -NewVHDSizeBytes 8GB `
-    -SwitchName "INTERNET"
+New-VM -Name $OPNsense.Name `
+    -Generation $OPNsense.Generation `
+    -MemoryStartupBytes $OPNsense.VRAMBytes `
+    -Path $OPNsense.Path `
+    -NewVHDPath $OPNsense.VHDPath `
+    -NewVHDSizeBytes $OPNsense.VHDSizeBytes `
+    -SwitchName $OPNsense.SwitchNameWAN
 
-# Assign 2 virtual processors
-Set-VMProcessor -VMName "opnsense" -Count 2
+# Assign 2 virtual processors and disable secure boot
+Set-VMProcessor -VMName $OPNsense.Name -Count $OPNsense.CPUCount
+Set-VMFirmware -VMName $OPNsense.Name -EnableSecureBoot Off
 
 # Attach the installation ISO and boot from it
-$dvdDrive = Add-VMDvdDrive -VMName "opnsense" -Path "V:\ISO\opnsense-26.7.iso" -Passthru
-Set-VMFirmware -VMName "opnsense" -FirstBootDevice $dvdDrive
+$dvdDrive = Add-VMDvdDrive -VMName $OPNsense.Name -Path $OPNsense.ISOPath -Passthru
+Set-VMFirmware -VMName $OPNsense.Name -FirstBootDevice $dvdDrive
 
 # Disable dynamic memory
-Set-VMMemory -VMName "opnsense" -DynamicMemoryEnabled $false -StartupBytes 4GB
+Set-VMMemory -VMName $OPNsense.Name -DynamicMemoryEnabled $false -StartupBytes 4GB
 
 # Add a second vNIC
-Add-VMNetworkAdapter -VMName "opnsense" `
-    -Name "KIFORMATOU" `
-    -SwitchName "KIFORMATOU"
+Add-VMNetworkAdapter -VMName $OPNsense.Name `
+    -Name $OPNsense.SwitchNameLAN `
+    -SwitchName $OPNsense.SwitchNameLAN
 
 # Display the VM status
-Get-VM -Name "opnsense"
+Get-VM -Name $IPFire.Name
