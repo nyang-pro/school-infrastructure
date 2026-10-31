@@ -19,7 +19,7 @@ $OPNsense = [PSCustomObject]@{
     VRAMBytes     = 4GB
     Path          = "V:\Kiformatou\opnsense"
     VHDPath       = "V:\Kiformatou\opnsense\opnsense.vhdx"
-    VHDSizeBytes  = 8GB
+    VHDSizeBytes  = 16GB
     SwitchNameWAN = "INTERNET"
     SwitchNameLAN = "KIFORMATOU"
     ISOPath       = "V:\ISO\opnsense-26.7.iso"
@@ -46,9 +46,9 @@ $dvdDrive = Add-VMDvdDrive -VMName $OPNsense.Name -Path $OPNsense.ISOPath -Passt
 Set-VMFirmware -VMName $OPNsense.Name -FirstBootDevice $dvdDrive
 
 # Disable dynamic memory
-Set-VMMemory -VMName $OPNsense.Name -DynamicMemoryEnabled $false -StartupBytes 4GB
+Set-VMMemory -VMName $OPNsense.Name -DynamicMemoryEnabled $false -StartupBytes @OPNsense.VRAMBytes
 
-# Add a second vNIC
+# Add a second vNIC for LAN
 Add-VMNetworkAdapter -VMName $OPNsense.Name `
     -Name $OPNsense.SwitchNameLAN `
     -SwitchName $OPNsense.SwitchNameLAN
