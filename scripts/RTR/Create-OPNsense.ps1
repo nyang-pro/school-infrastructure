@@ -53,5 +53,12 @@ Add-VMNetworkAdapter -VMName $OPNsense.Name `
     -Name $OPNsense.SwitchNameLAN `
     -SwitchName $OPNsense.SwitchNameLAN
 
+# Active Trunk for VLANs 10, 20 and 30
+Set-VMNetworkAdapterVlan -VMName $OPNsense.Name `
+  -VMNetworkAdapterName $OPNsense.SwitchNameLAN `
+  -Trunk -AllowedVlanIdList "10,20,30" -NativeVlanId 0
+
+
 # Display the VM status
 Get-VM -Name $OPNsense.Name
+Get-VMNetworkAdapterVlan -VMName $OPNsense.Name
